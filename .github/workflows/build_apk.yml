@@ -1,0 +1,37 @@
+name: APK Oluştur
+
+# Bu dosya GitHub'a yüklendiğinde (repo'ya push edildiğinde) ya da
+# "Actions" sekmesinden elle çalıştırıldığında otomatik olarak
+# `flutter build apk` komutunu buluttaki bir Ubuntu makinede çalıştırır
+# ve sonuçta oluşan APK dosyasını indirilebilir bir "artifact" olarak sunar.
+# Kendi bilgisayarınıza Flutter kurmanıza gerek kalmaz.
+
+on:
+  workflow_dispatch: # "Actions" sekmesinden "Run workflow" ile elle tetikleme
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kodu indir
+        uses: actions/checkout@v4
+
+      - name: Flutter kur
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+
+      - name: Bağımlılıkları indir
+        run: flutter pub get
+
+      - name: APK derle (release)
+        run: flutter build apk --release
+
+      - name: APK'yı yükle (indirilebilir artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: inci-gida-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
